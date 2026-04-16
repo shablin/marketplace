@@ -1,0 +1,267 @@
+services:
+  nats:
+    image: nats:2.12-alpine
+    command: ["-js"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO http://127.0.0.1:8222/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    healthchecks:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+  
+  auth-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+      POSTGRES_DB: auth
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  user-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: user
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d user"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  catalog-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: catalog
+      POSTGRES_PASSWORD: catalog
+      POSTGRES_DB: catalog
+    volumes:
+      - catalog-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalog -d catalog"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  cart-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: cart
+      POSTGRES_PASSWORD: cart
+      POSTGRES_DB: cart
+    volumes:
+      - cart-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cart -d cart"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  order-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order
+      POSTGRES_DB: order
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order -d order"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  payment-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment
+      POSTGRES_DB: payment
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment -d payment"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  notification-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: notification
+      POSTGRES_PASSWORD: notification
+      POSTGRES_DB: notification
+    volumes:
+      - notification-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notification -d notification"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  auth-service:
+    build: ./services/auth-service
+    environment:
+      SERVICE_NAME: auth-service
+      PORT: "8081"
+      DATABASE_URL: postgresq://auth:auth@auth-db:5432/auth?sslmode=disable
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      SERVICE_NAME: user-service
+      PORT: "8082"
+      DATABASE_URL: postgres://user:user@user-db:5432/user?sslmode=disable
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      user-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+
+  catalog-service:
+    build: ./services/catalog-service
+    environment:
+      SERVICE_NAME: catalog-service
+      PORT: "8083"
+      DATABASE_URL: postgres://catalog:catalog@catalog-db:5432/catalog?sslmode=disable
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      catalog-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+
+  cart-service:
+    build: ./services/cart-service
+    environment:
+      SERVICE_NAME: cart-service
+      PORT: "8084"
+      DATABASE_URL: postgres://cart:cart@cart-db:5432/cart?sslmode=disable
+      REDIS_ADDR: redis:6379
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      cart-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8084:8084"
+
+  order-service:
+    build: ./services/order-service
+    environment:
+      SERVICE_NAME: order-service
+      PORT: "8085"
+      DATABASE_URL: postgres://order:order@order-db:5432/order?sslmode=disable
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      order-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+
+  payment-service:
+    build: ./services/payment-service
+    environment:
+      SERVICE_NAME: payment-service
+      PORT: "8086"
+      DATABASE_URL: postgres://payment:payment@payment-db:5432/payment?sslmode=disable
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      payment-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8086:8086"
+
+  notification-service:
+    build: ./services/notification-service
+    environment:
+      SERVICE_NAME: notification-service
+      PORT: "8087"
+      DATABASE_URL: postgres://notification:notification@notification-db:5432/notification?sslmode=disable
+      NATS_URL: nats://nats:4222
+      EVENT_ORDER_CREATED: order_created
+      EVENT_PAYMENT_SUCCEEDED: payment_succeeded
+      EVENT_PAYMENT_FAILED: payment_failed
+    depends_on:
+      notification-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "8087:8087"
+
+volumes:
+  auth-db-data:
+  user-db-data:
+  catalog-db-data:
+  cart-db-data:
+  order-db-data:
+  payment-db-data:
+  notification-db-data:
