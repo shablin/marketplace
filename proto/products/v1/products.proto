@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package marketplace.products.v1;
+
+option go_package = "github.com/shablin/marketplace/proto/products/v1;productsv1";
+
+service ProductService {
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc UpsertProduct(UpsertProductRequest) returns (UpsertProductResponse);
+}
+
+message ListProductsRequest {
+  string query = 1;
+}
+
+message Product {
+  string product_id = 1;
+  string seller_id = 2;
+  string title = 3;
+  int64 price_cents = 4;
+}
+
+message ListProductsResponse {
+  repeated Product items = 1;
+}
+
+message UpsertProductRequest {
+  Product product = 1;
+}
+
+message UpsertProductResponse {
+  string product_id = 1;
+}

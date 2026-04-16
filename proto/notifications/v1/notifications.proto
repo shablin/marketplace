@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package marketplace.notifications.v1;
+
+option go_package = "github.com/shablin/marketplace/proto/notifications/v1;notificationsv1";
+
+service NotificationService {
+    rpc Send(SendNotificationRequest) returns (SendNotificationResponse);
+}
+
+message SendNotificationRequest {
+    string user_id = 1;
+    string channel = 2;
+    string template = 3;
+}
+
+message SendNotificationResponse {
+    string notification_id = 1;
+    string status = 2;
+}

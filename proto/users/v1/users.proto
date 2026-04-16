@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package marketplace.users.v1;
+
+option go_package = "github.com/shablin/marketplace/proto/users/v1;usersv1";
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  string user_id = 1;
+  string email = 2;
+  string role = 3;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  string display_name = 2;
+}
+
+message UpdateUserResponse {
+  string user_id = 1;
+}

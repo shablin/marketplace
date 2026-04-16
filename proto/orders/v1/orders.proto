@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package marketplace.orders.v1;
+
+option go_package = "github.com/shablin/marketplace/proto/orders/v1;ordersv1";
+
+service OrderService {
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+    rpc GetOrder(GetOrederRequest) returns (GetOrderResponse);
+}
+
+message CreateOrderRequest {
+    string user_id = 1;
+    repeated string product_ids = 2;
+}
+
+message CreateOrderResponse {
+    string order_id = 1;
+    string status = 2;
+}
+
+message GetOrderRequest {
+    string order_id = 1;
+}
+
+message GetOrderResponse {
+    string order_id = 1;
+    string user_id = 2;
+    string statis = 3;
+}

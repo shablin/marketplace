@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package marketplace.cart.v1;
+
+option go_package = "github.com/shablin/marketplace/proto/cart/v1;cartv1";
+
+service CartService {
+    rpc GetCart(GetCartRequest) returns (GetCartResponse);
+    rpc AddItem(AddItemRequest) returns (GetCartResponse);
+}
+
+message GetCartRequest {
+    string user_id = 1;
+}
+
+message CartItem {
+    string product_id = 1;
+    uint32 quantity = 2;
+}
+
+message GetCartResponse {
+    string user = 1;
+    repeated CartItem items = 2;
+}
+
+message AddItemRequest {
+    string user_id = 1;
+    string product_id = 2;
+    uint32 quantity = 3;
+}
+
+message AddItemResponse {
+    string user_id = 1;
+}
