@@ -5,7 +5,7 @@ create table if not exists carts (
     user_id uuid not null,
     status text not null default 'active'
         check (status in ('active', 'checked_out', 'abandoned')),
-    currency char(3) not null default 'rub',
+    currency char(3) not null default 'RUB',
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
