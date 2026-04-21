@@ -7,10 +7,20 @@ option go_package = "github.com/shablin/marketplace/proto/products/v1;productsv1
 service ProductService {
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
   rpc UpsertProduct(UpsertProductRequest) returns (UpsertProductResponse);
+  rpc ModerateProduct(ModerateProductRequest) returns (ModerateProductResponse);
 }
 
 message ListProductsRequest {
   string query = 1;
+  bool only_available = 2;
+}
+
+enum ProductStatus {
+  PRODUCT_STATUS_UNSPECIFIED = 0;
+  PRODUCT_STATUS_PUBLISHED = 1;
+  PRODUCT_STATUS_HIDDEN = 2;
+  PRODUCT_STATUS_ARCHIVED = 3;
+  PRODUCT_STATUS_OUT_OF_STOCK = 4;
 }
 
 message Product {
@@ -18,6 +28,8 @@ message Product {
   string seller_id = 2;
   string title = 3;
   int64 price_cents = 4;
+  uint32 stock = 5;
+  ProductStatus status = 6;
 }
 
 message ListProductsResponse {
@@ -26,8 +38,21 @@ message ListProductsResponse {
 
 message UpsertProductRequest {
   Product product = 1;
+  string idempotency_key = 2;
 }
 
 message UpsertProductResponse {
   string product_id = 1;
+}
+
+message ModerateProductRequest {
+  string product_id = 1;
+  ProductStatus new_status = 2;
+  string reason = 3;
+  string idempotency_key = 4;
+}
+
+message ModerateProductResponse {
+  string product_id = 1;
+  ProductStatus status = 2;
 }
