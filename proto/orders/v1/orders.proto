@@ -6,17 +6,33 @@ option go_package = "github.com/shablin/marketplace/proto/orders/v1;ordersv1";
 
 service OrderService {
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
-    rpc GetOrder(GetOrederRequest) returns (GetOrderResponse);
+    rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+    rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse);
+}
+
+enum OrderStatus {
+    ORDER_STATUS_UNSPECIFIED = 0;
+    ORDER_STATUS_CREATED = 1;
+    ORDER_STATUS_PAID = 2;
+    ORDER_STATUS_CANCELLED = 3;
+}
+
+message OrderItem {
+    string product_id = 1;
+    uint32 quantity = 2;
+    int64 price_snapshot = 3;
+    string product_name_snapshot = 4;
 }
 
 message CreateOrderRequest {
     string user_id = 1;
-    repeated string product_ids = 2;
+    repeated OrderItem items = 2;
+    string idempotency_key = 3;
 }
 
 message CreateOrderResponse {
     string order_id = 1;
-    string status = 2;
+    OrderStatus status = 2;
 }
 
 message GetOrderRequest {
@@ -26,5 +42,16 @@ message GetOrderRequest {
 message GetOrderResponse {
     string order_id = 1;
     string user_id = 2;
-    string statis = 3;
+    OrderStatus status = 3;
+    repeated OrderItem items = 4;
+}
+
+message ProcessPaymentRequest {
+    string order_id = 1;
+    string idempotency_key = 2;
+}
+
+message ProcessPaymentResponse {
+    string order_id = 1;
+    OrderStatus status = 2;
 }
