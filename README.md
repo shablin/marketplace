@@ -51,7 +51,14 @@ curl -i http://localhost:8081/ready
 ```
 
 The same way for other services, just
-get `/health` and `/ready` with CURL
+get `/health` and `/ready`
+with CURL by service's port, or run loop:
+
+```bash
+for port in 8081 8082 8083 8084 8084 8085 8086 8087; do
+     curl -fsS "http://localhost:${port}/health" && echo <- ${port} OK"
+done
+```
 
 ## Workflow
 ### Step 1. Register
