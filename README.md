@@ -124,5 +124,5 @@ curl -s -X POST http://localhost:8081/auth/reset-password/confirm \
 
 ## See also
 
-- REST/OpenAPI: `api/openapi.yaml`
-- gRPC/Protobuf: `proto/` and `proto/README.md`
+- [REST/OpenAPI](https://github.com/shablin/marketplace/tree/docs/api)
+- [gRPC/Protobuf](https://github.com/shablin/marketplace/tree/main/proto)
