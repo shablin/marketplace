@@ -1,45 +1,121 @@
 # marketplace
-Yet another project in educational purposes.
 
-# My Goals
-* Implement Microservice architecture
-* Implement gRPC and Protobuf
-
-and much more...
+Study backend project with microservices for minimal marketplace
 
 # About
-A backend for mini-marketplace without overkill stack and technologies.
-This aims to implement MVP as a lightweight solution.
 
-You can get to know my plans below:
+A brief description of repository
 
-## Root Structure
+## Structure
+
 ```
-.
-api/                          External REST contracts (OpenAPI)
-proto/                        Internal gRPC contracts (Protobuf)
-internal/
-....platform/                 Shared tech layer
+api/                        External REST contracts (OpenAPI)
+proto/                      Internal gRPC contracts (Protobuf)
+internal/platform/          Shared infrastructure docs
+
 services/
-....auth-service/             Authentication & Authorization
-....user-service/             User profile & account data
-....catalog-service/          Product catalog and search metadata
-....cart-service/             Shopping cart management
-....order-service/            Order creation and lifecycle
-....payment-service/          Payment processing orchestra
-....notification-service/     User notifications
+...api-gateway/
+...auth-service/
+...cart-service/
+...catalog-service/
+...notification-service/
+...order-service/
+...payment-service/
+...user-service/
+...
 ```
 
-## Service Structure (per service)
-```
-services/<service>/
-....cmd/<service>/main.go     Service entrypoint
-....internal/                 Internal service logic
-....pkg/                      Reusable external service libs
-....go.mod                    Local Go module for service
+## Quick Start
+### Step 1. Up the services
+
+```bash
+docker compose up --build
 ```
 
-## Platform
-`internal/platform` contains configuration, logging, middleware.
-Domain/bussines logic statys within each service and is not
-shared through this layer.
+By default, services available at:
+
+- gateway:          `:8080`
+- auth:             `:8081`
+- cart:             `:8082`
+- catalog:          `:8083`
+- notification:     `:8084`
+- order:            `:8085`
+- payment:          `:8086`
+- user:             `:8087`
+
+### Step 2. Check services availability
+
+```bash
+curl -i http://localhost:8081/health
+curl -i http://localhost:8081/ready
+```
+
+The same way for other services, just
+get `/health` and `/ready` with CURL
+
+## Workflow
+### Step 1. Register
+
+```bash
+curl -s -X POST http://localhost:8081/auth/register \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"you@example.com", "password": "yourpassword"}'
+```
+
+### Step 2. Login
+
+```bash
+curl -s -X POST http://localhost:8081/auth/login \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"you@example.com", "password":"yourpassword"}'
+```
+
+> [!WARNING]
+> Save `access_token` and `refresh_token` from response
+
+### Step 3. Checkout
+
+Checkout pipeline consist of:
+
+1. Create order
+2. Payment
+3. Get notification
+
+You can test this pipeline with integration test:
+
+```bash
+cd services/order-service && go test ./internal/order -run TestCreateOrderPaymentNotificationFlow
+```
+
+> [!IMPORTANT]
+> Now this integration test and related business logic are still not implemented.
+> Reference only
+
+### Step 4. Logout / Revoke Token
+
+```bash
+curl -s -X POST http://localhost:8081/auth/logout \
+     -H 'Content-Type: application/json' \
+     -d '{"refresh_token":"<refresh_token>"}'
+```
+
+### Step 5. Reset password
+
+```bash
+curl -s -X POST http://localhost:8081/auth/reset-password \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"you@example.com"}'
+```
+
+Then you should approve password reset:
+
+```bash
+curl -s -X POST http://localhost:8081/auth/reset-password/confirm \
+     -H 'Content-Type: application/json' \
+     -d '{"token":"<reset_token>", "new_password":"yournewpassword"}'
+```
+
+## See also
+
+- REST/OpenAPI: `api/openapi.yaml`
+- gRPC/Protobuf: `proto/` and `proto/README.md`
