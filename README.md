@@ -124,5 +124,7 @@ curl -s -X POST http://localhost:8081/auth/reset-password/confirm \
 
 ## See also
 
-- [REST/OpenAPI](https://github.com/shablin/marketplace/tree/docs/api)
+If you're looking for contracts docs, check this out:
+
+- [REST/OpenAPI](https://github.com/shablin/marketplace/tree/main/api)
 - [gRPC/Protobuf](https://github.com/shablin/marketplace/tree/main/proto)
