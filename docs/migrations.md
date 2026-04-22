@@ -36,7 +36,7 @@ suits to workflow: `user > catalog > cart > order > payment > notification`
 ## Examples
 
 > [!IMPORTANT]
-> Replace DSN values with your local database creds
+> Replace DSN with your local database creds
 
 ### Apply
 
