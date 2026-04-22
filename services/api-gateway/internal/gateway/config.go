@@ -1,17 +1,22 @@
 package gateway
 
-import "os"
+import (
+	"io"
+	"os"
+)
 
 type Config struct {
 	ListenAddr string
 	JWTSecret  string
 	Routes     map[string]string
+	LogOutput  io.Writer
 }
 
 func NewConfig() Config {
 	return Config{
 		ListenAddr: envOrDefault("GATEWAY_ADDR", ":8080"),
 		JWTSecret:  envOrDefault("GATEWAY_JWT_SECRET", "secret"),
+		LogOutput:  os.Stdout,
 		Routes: map[string]string{
 			"/auth":          envOrDefault("AUTH_SERVICE_URL", "http://localhost:8081"),
 			"/users":         envOrDefault("USER_SERVICE_URL", "http://localhost:8082"),
